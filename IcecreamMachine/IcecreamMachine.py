@@ -1,6 +1,6 @@
 from enum import Enum
-from IceceamExceptions import ExceededRemainingChoicesException, InvalidChoiceException, NeedsCleaningException, OutOfStockException
-from IceceamExceptions import InvalidPaymentException
+from IcecreamExceptions import ExceededRemainingChoicesException, InvalidChoiceException, NeedsCleaningException, OutOfStockException
+from IcecreamExceptions import InvalidPaymentException
 
 class Usable:
     name = ""
