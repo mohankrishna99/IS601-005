@@ -1,4 +1,6 @@
 from enum import Enum
+# make a tests folder under the folder you're putting these files in
+# add an empty __init__.py to the tests folder
 from IcecreamExceptions import ExceededRemainingChoicesException, InvalidChoiceException, NeedsCleaningException, OutOfStockException
 from IcecreamExceptions import InvalidPaymentException
 
