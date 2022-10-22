@@ -16,8 +16,11 @@ class Usable:
 
     def use(self):
         self.quantity -= 1
-        if (self.quantity < 0):
-            raise OutOfStockException
+        try:
+            if (self.quantity < 0):
+                raise OutOfStockException
+        except OutOfStockException:
+            print("Requested is out of stock")
         return self.quantity 
 
     def in_stock(self):
@@ -142,7 +145,10 @@ class IceCreamMachine:
             
     def calculate_cost(self):
         # TODO add the calculation expression/logic for the inprogress_icecream
-        return 10000
+        cost = 0                            ##UCID: mk994 date: October 20
+        for i in self.inprogress_icecream:
+            cost += (i.cost)
+        return cost
 
     def run(self):
         if self.currently_selecting == STAGE.Container:
@@ -156,7 +162,7 @@ class IceCreamMachine:
             self.handle_toppings(toppings)
         elif self.currently_selecting == STAGE.Pay:
             expected = self.calculate_cost()
-            total = input(f"Your total is {expected}, please enter the exact value.\n")
+            total = input(f"Your total is {format(expected, '.2f')}, please enter the exact value.\n")
             self.handle_pay(expected, total)
             choice = input("What would you like to do? (icecream or quit)\n")
             if choice == "quit":
