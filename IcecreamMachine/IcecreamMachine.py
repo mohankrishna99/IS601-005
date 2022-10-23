@@ -16,11 +16,8 @@ class Usable:
 
     def use(self):
         self.quantity -= 1
-        try:
-            if (self.quantity < 0):
-                raise OutOfStockException
-        except OutOfStockException:
-            print("Requested is out of stock")
+        if (self.quantity < 0):
+            raise OutOfStockException
         return self.quantity 
 
     def in_stock(self):
@@ -151,22 +148,49 @@ class IceCreamMachine:
         return cost
 
     def run(self):
-        if self.currently_selecting == STAGE.Container:
-            container = input(f"Would you like a {', '.join(list(map(lambda c:c.name.lower(), filter(lambda c: c.in_stock(), self.containers))))}?\n")
-            self.handle_container(container)
-        elif self.currently_selecting == STAGE.Flavor:
-            flavor = input(f"Would you like {', '.join(list(map(lambda f:f.name.lower(), filter(lambda f: f.in_stock(), self.flavors))))}? Or type next.\n")
-            self.handle_flavor(flavor)
-        elif self.currently_selecting == STAGE.Toppings:
-            toppings = input(f"Would you like {', '.join(list(map(lambda t:t.name.lower(), filter(lambda t: t.in_stock(), self.toppings))))}? Or type done.\n")
-            self.handle_toppings(toppings)
-        elif self.currently_selecting == STAGE.Pay:
-            expected = self.calculate_cost()
-            total = input(f"Your total is {format(expected, '.2f')}, please enter the exact value.\n")
-            self.handle_pay(expected, total)
-            choice = input("What would you like to do? (icecream or quit)\n")
-            if choice == "quit":
-                exit()
+        try:
+            if self.currently_selecting == STAGE.Container:
+                container = input(f"Would you like a {', '.join(list(map(lambda c:c.name.lower(), filter(lambda c: c.in_stock(), self.containers))))}?\n")
+                self.handle_container(container)
+            elif self.currently_selecting == STAGE.Flavor:
+                flavor = input(f"Would you like {', '.join(list(map(lambda f:f.name.lower(), filter(lambda f: f.in_stock(), self.flavors))))}? Or type next.\n")
+                self.handle_flavor(flavor)
+            elif self.currently_selecting == STAGE.Toppings:
+                toppings = input(f"Would you like {', '.join(list(map(lambda t:t.name.lower(), filter(lambda t: t.in_stock(), self.toppings))))}? Or type done.\n")
+                self.handle_toppings(toppings)
+            elif self.currently_selecting == STAGE.Pay:
+                expected = self.calculate_cost()
+                total = input(f"Your total is {format(expected, '.2f')}, please enter the exact value.\n")
+                self.handle_pay(expected, total)
+                choice = input("What would you like to do? (icecream or quit)\n")
+                if choice == "quit":
+                    exit()
+        ##UCID: mk994 Date Octoer 22
+        except OutOfStockException:
+            print("Requested is out of stock")
+        
+        except InvalidPaymentException:
+            print(f"You entered the wrong amount, Please enter the correct total {expected}")
+        
+        except ExceededRemainingChoicesException:
+            print(f"Sorry you have exceeded the choices in {self.currently_selecting}, Please go on to the next step")
+            if self.currently_selecting == STAGE.Flavor:
+                self.handle_flavor("next")
+            elif self.currently_selecting == STAGE.Toppings:
+                self.handle_toppings("done")
+        
+        except NeedsCleaningException:
+            need_cleaning = True
+            while need_cleaning:
+                print("Sorry, The machine needs cleaning.")
+                response = input("Would you like to proceed with cleaning? Type yes or no\n")
+                if response.lower() == "yes":
+                    self.clean_machine()
+                    need_cleaning = False
+        
+        except InvalidChoiceException:
+            print("The entered choice is not available or the spelling is incorrect. Please enter again")
+
         self.run()
 
     def start(self):
