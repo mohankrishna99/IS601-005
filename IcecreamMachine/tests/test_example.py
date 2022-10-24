@@ -8,6 +8,7 @@ from IcecreamMachine import IceCreamMachine
 def machine():
     icm = IceCreamMachine()
     return icm
+"""
 @pytest.fixture
 def first_order(machine):
     machine.handle_container("cup")
@@ -27,3 +28,28 @@ def second_order(first_order, machine):
 
 def test_production_line(second_order):
     assert second_order is not None
+"""
+"""
+@pytest.fixture
+def machine():
+    icm = IceCreamMachine()
+    return icm
+@pytest.fixture
+def order(machine):
+    machine.handle_flavor("vanilla")
+    return machine
+#@pytest.mark.parametrize("containers",["waffle cone", "sugar cone", "cup"])
+def test_container_first_sel(order, containers):
+    #print(order.inprogress_icecream[0].name)
+    assert order.inprogress_icecream[0].name in containers
+    """
+def test_first_sel(machine):
+    machine.handle_container("cup")
+    machine.handle_flavor("vanilla")
+    machine.handle_flavor("chocolate")
+    machine.handle_flavor("next")
+    machine.handle_toppings("m&ms")
+    machine.handle_toppings("done")
+
+    y = machine.inprogress_icecream[0].name.lower()
+    assert y in ["waffle cone", "sugar cone", "cup"]

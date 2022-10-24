@@ -50,6 +50,23 @@ class IceCreamMachine:
     toppings = [Toppings(name="Sprinkles", quantity=200, cost=.25), Toppings(name="Chocolate Chips", quantity=200, cost=.25), Toppings(name="M&Ms", quantity=200, cost=.25), \
     Toppings(name="Gummy Bears", quantity=200, cost=.25), Toppings(name="Peanuts", quantity=200, cost=.25)] 
 
+    container_names = []
+    for i in containers:
+        container_names.append(i.name.lower())
+    flavors_names = []
+    for i in flavors:
+        flavors_names.append(i.name.lower())
+    toppings_names = []
+    for i in toppings:
+        toppings_names.append(i.name.lower())
+
+    def check_flav_top(self):
+        flav_top = self.flavors_names + self.toppings_names
+        c = 0 
+        for i in range(1, len(self.inprogress_icecream)):
+            if self.inprogress_icecream[i].name.lower() in flav_top:
+                c += 1
+        return c
 
     # variables
     remaining_uses = USES_UNTIL_CLEANING
@@ -120,6 +137,11 @@ class IceCreamMachine:
         self.currently_selecting = STAGE.Flavor
 
     def handle_flavor(self, flavor):
+        try:
+            if self.inprogress_icecream[0].name in self.container_names:
+                pass
+        except:
+            print("Choose a container first")
         if flavor == "next":
             self.currently_selecting = STAGE.Toppings
         else:
@@ -127,7 +149,11 @@ class IceCreamMachine:
 
     def handle_toppings(self, toppings):
         if toppings == "done":
-            self.currently_selecting = STAGE.Pay
+            if self.check_flav_top():
+                self.currently_selecting = STAGE.Pay
+            else:
+                print("Choose atleast one flavor or topping")
+                self.currently_selecting = STAGE.Flavor
         else:
             self.pick_toppings(toppings)
 
@@ -142,7 +168,9 @@ class IceCreamMachine:
             
     def calculate_cost(self):
         # TODO add the calculation expression/logic for the inprogress_icecream
-        cost = 0                            ##UCID: mk994 date: October 20
+        ##UCID: mk994   Date: October 20
+        ##setting cost to zero initially and looping the inprogress_icecream list to calculate the cost
+        cost = 0
         for i in self.inprogress_icecream:
             cost += (i.cost)
         return cost
@@ -160,18 +188,25 @@ class IceCreamMachine:
                 self.handle_toppings(toppings)
             elif self.currently_selecting == STAGE.Pay:
                 expected = self.calculate_cost()
+                ##UCID:mk994 Date: October 20, formatting the cost to display two decimals
                 total = input(f"Your total is {format(expected, '.2f')}, please enter the exact value.\n")
                 self.handle_pay(expected, total)
                 choice = input("What would you like to do? (icecream or quit)\n")
                 if choice == "quit":
                     exit()
-        ##UCID: mk994 Date Octoer 22
-        except OutOfStockException:
-            print("Requested is out of stock")
         
+        ##UCID: mk994  Date:October 22
+        ## adding the OutOfStockException and printing the message for user to choose from available options
+        except OutOfStockException:
+            print("Requested choice is out of stock, Please choose from the options available")
+        
+        ##UCID: mk994  Date:October 22
+        ## adding the InvalidPaymentException and printing the message for user to enter the correct total
         except InvalidPaymentException:
             print(f"You entered the wrong amount, Please enter the correct total {expected}")
         
+        ##UCID: mk994  Date:October 22
+        ## adding the ExceededRemainingChoicesException and printing the message for user and moving to next step
         except ExceededRemainingChoicesException:
             print(f"Sorry you have exceeded the choices in {self.currently_selecting}, Please go on to the next step")
             if self.currently_selecting == STAGE.Flavor:
@@ -179,6 +214,8 @@ class IceCreamMachine:
             elif self.currently_selecting == STAGE.Toppings:
                 self.handle_toppings("done")
         
+        ##UCID: mk994  Date:October 22
+        ## adding the NeedsCleaningException and printing the message for user and asking input from the user to clean or not
         except NeedsCleaningException:
             need_cleaning = True
             while need_cleaning:
@@ -188,6 +225,8 @@ class IceCreamMachine:
                     self.clean_machine()
                     need_cleaning = False
         
+        ##UCID: mk994  Date:October 22
+        ## adding the InvalidChoiceException and printing the message for user to enter the choice again
         except InvalidChoiceException:
             print("The entered choice is not available or the spelling is incorrect. Please enter again")
 
