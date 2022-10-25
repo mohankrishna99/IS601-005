@@ -32,8 +32,10 @@ def second_order(first_order, machine):
     machine.handle_pay(2.25,"2.25")
     return machine
 
-def test_seven(second_order, machine):
+@pytest.mark.five
+def test_seven(first_order, second_order, machine):
     assert machine.total_sales == 5.50
 
+@pytest.mark.five
 def test_eight(second_order, machine):
     assert machine.total_icecreams == 2

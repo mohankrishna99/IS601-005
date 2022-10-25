@@ -23,6 +23,8 @@ def one_order(machine):
 
 @pytest.mark.one
 def test_one(one_order):
+    ##checking if the first element in inprogress icecream list is a container
+    ## or not
     x = one_order.inprogress_icecream[0].name.lower()
     assert x in ["waffle cone", "sugar cone", "cup"]
     print("\ncontainer is the first selection")

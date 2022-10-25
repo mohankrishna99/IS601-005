@@ -21,8 +21,10 @@ def six_one_order(machine):
 
 ##UCID: mk994, Date: October 23
 ##Test six to check if the total cost is correctly calculated
-def test_six1(six_one_order):
-    assert six_one_order.calculate_cost() == 3.25
+
+@pytest.mark.four
+def test_total_cost1(six_one_order):
+    assert six_one_order.calculate_cost() == '3.25'
 
 @pytest.fixture
 def second_order(machine):
@@ -33,5 +35,6 @@ def second_order(machine):
     machine.handle_toppings("done")
     return machine
 
-def test_six2(second_order):
-    assert second_order.calculate_cost() == 2.00
+@pytest.mark.four
+def test_total_cost2(second_order):
+    assert second_order.calculate_cost() == '2.00'
