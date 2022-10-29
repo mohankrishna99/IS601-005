@@ -1,0 +1,31 @@
+<table><tr><td> <em>Assignment: </em> Sample Flask App and Readings</td></tr>
+<tr><td> <em>Student: </em> Mohan Krishna Kotha (mk994)</td></tr>
+<tr><td> <em>Generated: </em> 10/29/2022 12:28:57 PM</td></tr>
+<tr><td> <em>Grading Link: </em> <a rel="noreferrer noopener" href="https://learn.ethereallab.app/homework/IS601-005-F22/sample-flask-app-and-readings/grade/mk994" target="_blank">Grading</a></td></tr></table>
+<table><tr><td> <em>Instructions: </em> <ol><li>&nbsp;Follow the slides from class.&nbsp;</li><li>&nbsp;Get the sample app deployed to Heroku dev</li><li>&nbsp;Once finished with the slides create a pull request from the lesson branch to dev (don't close it yet)&nbsp;</li><li>&nbsp;Create an m6_submission.md file in the same directory as the flask sample app&nbsp;</li><li>&nbsp;Fill in the deliverables below&nbsp;</li><li>&nbsp;Generate the markdown and paste the content into the new md file&nbsp;</li><li>&nbsp;git add/commit/push&nbsp;</li><li>&nbsp;Complete the pull request&nbsp;</li><li>&nbsp;Create a pull request from dev to prod&nbsp;</li><li>&nbsp;Complete the merge&nbsp;</li><li>&nbsp;Locally checkout dev&nbsp;</li><li>&nbsp;git pull the latest dev changes&nbsp;</li><li>&nbsp;On GitHub navigate to the location of the m6_submission.md file from the prod branch&nbsp;</li><li>&nbsp;Grab that direct link and submit it to Canvas</li></ol></td></tr></table>
+<table><tr><td> <em>Deliverable 1: </em> Proof App has been deployed </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="http://via.placeholder.com/400x120/009955/fff?text=Complete"></td></tr>
+<tr><td><table><tr><td> <em>Sub-Task 1: </em> Screenshot the output of the app (including the url) showing it's running from Heroku dev</td></tr>
+<tr><td><table><tr><td><img width="768px" src="https://user-images.githubusercontent.com/67315458/198840754-5a02b2d9-3e7e-4821-89a2-222202c0775e.png"/></td></tr>
+<tr><td> <em>Caption:</em> <p>screenshot of sample app<br></p>
+</td></tr>
+</table></td></tr>
+<tr><td> <em>Sub-Task 2: </em> Add a direct link to the app here (prod url)</td></tr>
+<tr><td> <a rel="noreferrer noopener" target="_blank" href="https://is601-mk994-prod.herokuapp.com/">https://is601-mk994-prod.herokuapp.com/</a> </td></tr>
+</table></td></tr>
+<table><tr><td> <em>Deliverable 2: </em> Misc </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="http://via.placeholder.com/400x120/009955/fff?text=Complete"></td></tr>
+<tr><td><table><tr><td> <em>Sub-Task 1: </em> Add a link to the pull request from Flask-Sample-HW to Dev</td></tr>
+<tr><td> <a rel="noreferrer noopener" target="_blank" href="https://github.com/mohankrishna99/IS601-005/pull/9">https://github.com/mohankrishna99/IS601-005/pull/9</a> </td></tr>
+<tr><td> <em>Sub-Task 2: </em> Did you have any issues during setup and if so how did you resolve them, otherwise what did you learn?</td></tr>
+<tr><td> <em>Response:</em> <p>when deployed at first to heroku, it gave an application error, and the<br>thing is I missed adding gunicorn in the requirements.txt file.<br></p><br></td></tr>
+</table></td></tr>
+<table><tr><td> <em>Deliverable 3: </em> Readings </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="http://via.placeholder.com/400x120/009955/fff?text=Complete"></td></tr>
+<tr><td><table><tr><td> <em>Sub-Task 1: </em> What can you tell me about docker? Describe the various steps needed to get an app ran inside a docker container in your own words</td></tr>
+<tr><td> <em>Response:</em> <p>Docker is a container management service. The keywords of Docker are develop, ship<br>and run anywhere.The whole point of Docker is to make it simple for<br>developers to create programs, package them into containers, and then deploy those containers<br>wherever.<div>steps:&nbsp;</div><div>1. a dockerfile has to be created in our project folder</div><div>2. then we<br>use image, here as we write the code in python, we use python<br>3.10-slim image which installs the minimal packages.</div><div>3. then copying the code and installing<br>the requirements.</div><div>4. then using gunicorn we run our application.&nbsp;</div><br></p><br></td></tr>
+<tr><td> <em>Sub-Task 2: </em> What is Heroku? Why do you feel it was chosen for this class?</td></tr>
+<tr><td> <em>Response:</em> <p>Heroku is a Platform as a service. We use it to deploy &amp;<br>manage apps.<div>This was chosen cause we can deploy and test our apps built<br>as part of the course and can also be scaled in future if<br>interested</div><br></p><br></td></tr>
+<tr><td> <em>Sub-Task 3: </em> What is flask? List a few things you learned about it</td></tr>
+<tr><td> <em>Response:</em> <p><span style="font-family: Nunito, sans-serif; font-size: 16px; text-align: justify;">Flask is a web application framework<br>written in Python.</span><div><div style="text-align: justify;"><font face="Nunito, sans-serif"><span style="font-size: 16px;">Learnt virtual environment, Jinja template<br>engine</span></font></div><div><span style="font-family: Nunito, sans-serif; font-size: 16px; text-align: justify;"><br></span></div></div><br></p><br></td></tr>
+<tr><td> <em>Sub-Task 4: </em> What is the difference between a Dockerfile and a Github Action .yml file?</td></tr>
+<tr><td> <em>Response:</em> <p>Dockerfile contains the info about the container on how the application runs as<br>it has the base image to install python packages, copy the app code<br>&amp; intalling requirements and then running the app.<div>whereas Github Action .yml file is&nbsp;&lt;span<br>id=&quot;docs-internal-guid-409f203f-7fff-aa76-0432-d90111b5656f&quot;&gt;<span style="font-variant-numeric: normal; font-variant-east-asian: normal; vertical-align: baseline;">deploy content to Heroku when certain branches<br>are committed to or pushed to.</span></span><br><div><br></div></div><br></p><br></td></tr>
+</table></td></tr>
+<table><tr><td><em>Grading Link: </em><a rel="noreferrer noopener" href="https://learn.ethereallab.app/homework/IS601-005-F22/sample-flask-app-and-readings/grade/mk994" target="_blank">Grading</a></td></tr></table>
