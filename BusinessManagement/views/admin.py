@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
 from sql.db import DB
 import traceback
+import csv
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin.route("/import", methods=["GET","POST"])
@@ -17,6 +18,9 @@ def importCSV():
             flash('No selected file', "warning")
             return redirect(request.url)
         # TODO importcsv-1 check that it's a .csv file, return a proper flash message if it's not
+        if file.filename.split('.')[-1] != 'csv':
+            flash('Uploaded file is not CSV file', "warning")
+            return redirect(request.url)
         if file and secure_filename(file.filename):
             companies = []
             employees = []
