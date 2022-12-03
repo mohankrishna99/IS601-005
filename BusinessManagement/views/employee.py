@@ -43,7 +43,9 @@ def add():
         
         try:
             result = DB.insertOne("""
-            INSERT QUERY
+            INSERT INTO IS601_MP2_Employees (first_name, last_name, email, company_id)
+                    VALUES (%(first_name)s, %(last_name)s, %(email)s, (SELECT id FROM IS601_MP2_Companies WHERE name = %(company_name)s LIMIT 1))
+                    ON DUPLICATE KEY UPDATE first_name=%(first_name)s, last_name = %(last_name)s, email = %(email)s, company_id = (SELECT id FROM IS601_MP2_Companies WHERE name = %(company_name)s LIMIT 1)
             """,
             ) # <-- TODO add-6 add query and add arguments
             if result.status:
