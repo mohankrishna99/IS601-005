@@ -94,11 +94,11 @@ def add():
         if city == "":
             flash("Enter city", 'warning')
             return redirect(request.url)
-        if state == "":
-            flash("Enter state", 'warning')
-            return redirect(request.url)
         if country == "":
             flash("Enter country", 'warning')
+            return redirect("add")    
+        if state == "":
+            flash("Enter state", 'warning')
             return redirect(request.url)
         if website == '':
             website = 'N/A'
