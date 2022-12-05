@@ -13,6 +13,7 @@ def search():
     FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON e.company_id = c.id WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders
     allowed_columns = ["first_name", "last_name", "email", "company_name"]
+    allowed_list = [(v,v) for v in allowed_columns]
     # TODO search-2 get fn, ln, email, company, column, order, limit from request args
     ##UCID: mk994 Date: Dec 03 retreving the arguments from form
     fn = request.args.get('first_name')
@@ -63,7 +64,7 @@ def search():
         print(e)
         flash("Error occured, please check the data and try again", "error")
     # hint: use allowed_columns in template to generate sort dropdown
-    return render_template("list_employees.html", rows=rows, allowed_columns=allowed_columns)
+    return render_template("list_employees.html", rows=rows, allowed_columns=allowed_list)
 
 @employee.route("/add", methods=["GET","POST"])
 def add():
@@ -94,7 +95,8 @@ def add():
             ## UCID:mk994 Date: Dec 03
             ## Insert query to add the employee data to DB
             result = DB.insertOne("""INSERT INTO IS601_MP2_Employees (first_name, last_name, email, company_id)
-                        VALUES (%(first_name)s, %(last_name)s, %(email)s, %(company_name)s)""",
+                        VALUES (%(first_name)s, %(last_name)s, %(email)s, %(company_name)s)
+                        ON DUPLICATE KEY UPDATE first_name=%(first_name)s, last_name = %(last_name)s, email = %(email)s, company_id = %(company_id)s""",
             {'first_name':first_name, 'last_name':last_name, 'email':email, 'company_name':company})
             # <-- TODO add-6 add query and add arguments
             if result.status:
@@ -104,7 +106,7 @@ def add():
             ## UCID:mk994 Date: Dec 03
             ## message for exception
             print(e)
-            flash("Something is wrong please check again" + str(e), "danger")
+            flash("Exception occured: " + str(e), "danger")
     return render_template("add_employee.html")
 
 @employee.route("/edit", methods=["GET", "POST"])
@@ -119,11 +121,10 @@ def edit():
         if request.method == "POST":
             print("POST if")
             # TODO edit-1 retrieve form data for first_name, last_name, company, email
-            first_name = request.get.args("first_name")
-            print(first_name)
-            last_name = request.get.args("last_name")
-            company_id = request.get.args("company_id")
-            email = request.get.args("email")
+            first_name = request.form.get("first_name")
+            last_name = request.form.get("last_name")
+            company_id = request.form.get("company_id")
+            email = request.form.get("email")
             # TODO edit-2 first_name is required (flash proper error message)
             if first_name == "":
                 flash("First name is required", 'warning')
@@ -150,15 +151,16 @@ def edit():
             print("try")
             # TODO edit-8 fetch the updated data (including company_name)
             # company_name should be 'N/A' if the employee isn't assigned to a copany
-            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id c.name FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON e.company_id = c.id WHERE e.id =%s", id)
+            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id, c.name FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON c.id = e.company_id WHERE e.id =%s", id)
             print(result)
             if result.status:
                 row = result.row
+                print(row)
         except Exception as e:
             # TODO edit-9 make this user-friendly
             flash(str(e), "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", row = row)
+    return render_template("edit_employee.html", row = row, company = row['name'])
 
 @employee.route("/delete", methods=["GET"])
 def delete():
@@ -174,5 +176,5 @@ def delete():
         result = DB.delete("DELETE FROM IS601_MP2_Employees WHERE id = %s", id)
         del args['id']
         if result:
-            flash("Deleted successfully")
+            flash("Deleted successfully", 'success')
     return redirect(url_for("employee.search", **args))

@@ -56,7 +56,7 @@ def importCSV():
                     result = DB.insertMany(company_query, companies)
                     # TODO importcsv-5 display flash message about number of companies inserted
                     ## UCID: mk994 Date: Dec 03
-                    flash(f'{len(companies)} companies have been inserted', 'message')
+                    flash(f'{len(companies)} companies have been inserted', 'success')
                 except Exception as e:
                     traceback.print_exc()
                     flash("There was an error loading in the csv data", "danger")
@@ -70,7 +70,7 @@ def importCSV():
                     result = DB.insertMany(employee_query, employees)
                     # TODO importcsv-7 display flash message about number of employees loaded
                     ## UCID: mk994 Date: Dec 03
-                    flash(f'{len(employees)} employees have been inserted', "information")
+                    flash(f'{len(employees)} employees have been inserted', "success")
                 except Exception as e:
                     traceback.print_exc()
                     flash("There was an error loading in the csv data", "danger")

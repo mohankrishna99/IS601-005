@@ -10,10 +10,11 @@ def search():
     # don't do SELECT *
     ## UCID: mk994 Date: Dec 03
     ## Select query to get company data for search
-    query = "SELECT c.id, c.name, c.address, c.city, c.country, c.state, c.zip, c.website FROM IS601_MP2_Companies c WHERE 1=1"
+    query = "SELECT c.id, c.name, c.address, c.city, c.country, c.state, c.zip, c.website, COUNT(e.id) AS Employee_count FROM IS601_MP2_Companies c LEFT JOIN IS601_MP2_Employees e ON e.company_id = c.id WHERE 1=1"
     print(query)
     args = [] # <--- append values to replace %s placeholders
     allowed_columns = ["name", "city", "country", "state"]
+    allowed_list = [(v, v) for v in allowed_columns]
     # TODO search-2 get name, country, state, column, order, limit request args
     ## UCID: mk994 Date: Dec 03
     ## retieving the arguments
@@ -37,6 +38,7 @@ def search():
     if state:
         query += " AND c.state like %s"
         args.append(f"%{state}%")
+    query += " GROUP BY c.id"
     # TODO search-6 append sorting if column and order are provided and within the allows columsn and allowed order asc,desc
     if column and order:
         if column in allowed_columns and order in ["asc", "desc"]:
@@ -62,7 +64,7 @@ def search():
         print(e)
         flash("Error occured, please check the data and try again", "danger")
     # hint: use allowed_columns in template to generate sort dropdown
-    return render_template("list_companies.html", rows=rows, allowed_columns=allowed_columns)
+    return render_template("list_companies.html", rows=rows, allowed_columns=allowed_list)
 
 @company.route("/add", methods=["GET","POST"])
 def add():
@@ -98,7 +100,8 @@ def add():
         if country == "":
             flash("Enter country", 'warning')
             return redirect(request.url)
-        
+        if website == '':
+            website = 'N/A'
         has_error = False # use this to control whether or not an insert occurs
         
 
@@ -126,22 +129,43 @@ def add():
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
+    id = request.args.get("id")
+    if id is None:
+        flash("ID is missing", "danger")
+        return redirect("company.search")
     if True: # TODO update this for TODO edit-1
         if request.method == "POST":
             # TODO edit-2 retrieve form data for name, address, city, state, country, zip, website
-            name = request.args.get('name')
-            address = request.args.get('address')
-            city = request.args.get('city')
-            state = request.args.get('state')
-            country = request.args.get('country')
-            zipcode = request.args.get('zip')
-            website = request.args.get('website')
+            name = request.form.get('name')
+            address = request.form.get('address')
+            city = request.form.get('city')
+            state = request.form.get('state')
+            country = request.form.get('country')
+            zipcode = request.form.get('zip')
+            website = request.form.get('website')
             # TODO edit-3 name is required (flash proper error message)
+            if name == '' or name == None:
+                flash("Name is required", "danger")
+                return redirect("add")
             # TODO edit-4 address is required (flash proper error message)
+            if address == '' or address == None:
+                flash("Address is required", "danger")
+                return redirect("add")
             # TODO edit-5 city is required (flash proper error message)
+            if city == '' or city == None:
+                flash("City is required", "danger")
+                return redirect("add")
             # TODO edit-6 state is required (flash proper error message)
+            if state == '' or state == None:
+                flash("State is required", "danger")
+                return redirect("edit")
             # TODO edit-7 country is required (flash proper error message)
+            if country == '' or country == None:
+                flash("Country is required", "danger")
+                return redirect("edit")
             # TODO edit-8 website is not required
+            if website == '' or website == None:
+                website = 'N/A'
             # 
             # note: call zip variable zipcode as zip is a built in function it could lead to issues
             data = [name, address, city, state, country, zipcode, website]
@@ -156,18 +180,18 @@ def edit():
                     flash("Updated record", "success")
             except Exception as e:
                 # TODO edit-10 make this user-friendly
-                flash(str(e), "danger")
+                flash(f"Exception occured: {str(e)}", "danger")
         try:
             # TODO edit-11 fetch the updated data
-            result = DB.selectOne("SELECT name, address, city, state, country, zip, website FROM IS601_MP2_Companies WHERE id = %s", id)
+            result = DB.selectOne("SELECT name, address, city, country, state, zip, website FROM IS601_MP2_Companies WHERE id = %s", id)
             if result.status:
                 row = result.row
                 
         except Exception as e:
             # TODO edit-12 make this user-friendly
-            flash(str(e), "danger")
+            flash(f"Exception occured: {str(e)}", "danger")
     # TODO edit-13 pass the company data to the render template
-    return render_template("edit_company.html", row=row)
+    return render_template("edit_company.html", row=row, state = row['state'], country = row['country'])
 
 @company.route("/delete", methods=["GET"])
 def delete():
@@ -184,6 +208,6 @@ def delete():
         result = DB.delete("DELETE FROM IS601_MP2_Companies WHERE id = %s", id)
         del args['id']
         if result:
-            flash("Deleted successfully")
+            flash("Deleted successfully", 'success')
     return redirect(url_for("company.search", **args))
     pass
