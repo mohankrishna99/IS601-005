@@ -160,7 +160,7 @@ def edit():
             # TODO edit-9 make this user-friendly
             flash(str(e), "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", row = row, company = row['name'])
+    return render_template("edit_employee.html", row = row, company = row['company_id'])
 
 @employee.route("/delete", methods=["GET"])
 def delete():
