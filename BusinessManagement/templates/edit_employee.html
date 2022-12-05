@@ -25,9 +25,12 @@
                 <input class="form-control" id="email" name="email" value="{{row.email}}" />
             </div>
             {# use the below for company selection #}
-            {% with val = company_id or '' %}
-                {% include "company_dropdown.html" %}
-            {% endwith %}
+            <div class="col-12 mb-3">
+                <label class="form-label" for="company">Company</label>
+                {% with val = company_id or '' %}
+                    {% include "company_dropdown.html" %}
+                {% endwith %}
+            </div>
             <input type="submit" class="btn btn-primary" value="Save Employee" />
         </form>
     </div>
