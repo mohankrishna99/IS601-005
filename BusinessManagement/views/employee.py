@@ -96,7 +96,7 @@ def add():
             ## Insert query to add the employee data to DB
             result = DB.insertOne("""INSERT INTO IS601_MP2_Employees (first_name, last_name, email, company_id)
                         VALUES (%(first_name)s, %(last_name)s, %(email)s, %(company_name)s)
-                        ON DUPLICATE KEY UPDATE first_name=%(first_name)s, last_name = %(last_name)s, email = %(email)s, company_id = %(company_id)s""",
+                        ON DUPLICATE KEY UPDATE first_name=%(first_name)s, last_name = %(last_name)s, email = %(email)s, company_id = %(company_name)s""",
             {'first_name':first_name, 'last_name':last_name, 'email':email, 'company_name':company})
             # <-- TODO add-6 add query and add arguments
             if result.status:
