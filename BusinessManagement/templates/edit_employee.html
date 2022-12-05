@@ -25,7 +25,9 @@
                 <input class="form-control" id="email" name="email" value="{{row.email}}" />
             </div>
             {# use the below for company selection #}
-            {% include "company_dropdown.html" %}
+            {% with state=state, country=country %}
+                    {% include "country_state_selector.html" %}
+            {% endwith %}
             <input type="submit" class="btn btn-primary" value="Save Employee" />
         </form>
     </div>
