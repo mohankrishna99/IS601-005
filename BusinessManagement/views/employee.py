@@ -135,6 +135,8 @@ def edit():
             if last_name == "":
                 flash("Last name is required", 'warning')
             # TODO edit-4 company may be None
+            if company_id == '':
+                company_id = None
             # TODO edit-5 email is required (flash proper error message)
             if email == "":
                 flash("Email is required", 'warning')
@@ -158,7 +160,8 @@ def edit():
             ##UCID: mk994 Date: Dec 04
             ## selecting the edited data
             # company_name should be 'N/A' if the employee isn't assigned to a copany
-            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id, IF(c.name is not null, c.name,'N/A') FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON c.id = e.company_id WHERE e.id =%s", id)
+            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id, IF(c.name is not null, c.name,'N/A') \
+            FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON c.id = e.company_id WHERE e.id =%s", id)
             print(result)
             if result.status:
                 row = result.row
@@ -167,7 +170,7 @@ def edit():
             # TODO edit-9 make this user-friendly
             flash(str(e), "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", row = row, company = row['company'])
+    return render_template("edit_employee.html", row = row, company_id = row['company_id'])
 
 @employee.route("/delete", methods=["GET"])
 def delete():

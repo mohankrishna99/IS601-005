@@ -10,7 +10,7 @@ def search():
     # don't do SELECT *
     ## UCID: mk994 Date: Dec 03
     ## Select query to get company data for search
-    query = "SELECT c.id, c.name, c.address, c.city, c.country, c.state, c.zip, c.website, COUNT(e.id) AS Employee_count FROM IS601_MP2_Companies c LEFT JOIN IS601_MP2_Employees e ON e.company_id = c.id WHERE 1=1"
+    query = "SELECT c.id, c.name, c.address, c.city, c.country, c.state, c.zip, c.website, COUNT(e.id) AS employees FROM IS601_MP2_Companies c LEFT JOIN IS601_MP2_Employees e ON e.company_id = c.id WHERE 1=1"
     print(query)
     args = [] # <--- append values to replace %s placeholders
     allowed_columns = ["name", "city", "country", "state"]
