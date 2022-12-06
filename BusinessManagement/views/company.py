@@ -129,13 +129,17 @@ def add():
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
+    ## UCID: mk994 Date: Dec 04
+    ## code to check for id, if no id flash a message
     id = request.args.get("id")
     if id is None:
         flash("ID is missing", "danger")
         return redirect("company.search")
-    if True: # TODO update this for TODO edit-1
+    else: # TODO update this for TODO edit-1
         if request.method == "POST":
             # TODO edit-2 retrieve form data for name, address, city, state, country, zip, website
+            ##UCID: mk994 Date: Dec 04
+            ## retrieving the form data
             name = request.form.get('name')
             address = request.form.get('address')
             city = request.form.get('city')
@@ -143,6 +147,8 @@ def edit():
             country = request.form.get('country')
             zipcode = request.form.get('zip')
             website = request.form.get('website')
+            ##UCID: mk994 Date: Dec 04
+            ## flash messages for required fields
             # TODO edit-3 name is required (flash proper error message)
             if name == '' or name == None:
                 flash("Name is required", "danger")
@@ -172,6 +178,8 @@ def edit():
             data.append(id)
             try:
                 # TODO edit-9 fill in proper update query
+                ##UCID: mk994 Date: Dec 04
+                ## Update query to record the edited data
                 result = DB.update("""
                 UPDATE IS601_MP2_Companies SET name = %s, address = %s, city = %s, state = %s, country = %s, zip = %s, website = %s
                 WHERE id = %s
@@ -183,6 +191,8 @@ def edit():
                 flash(f"Exception occured: {str(e)}", "danger")
         try:
             # TODO edit-11 fetch the updated data
+            ##UCID: mk994 Date: Dec 04
+            ## selecting the edited data
             result = DB.selectOne("SELECT name, address, city, country, state, zip, website FROM IS601_MP2_Companies WHERE id = %s", id)
             if result.status:
                 row = result.row

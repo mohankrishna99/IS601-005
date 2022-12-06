@@ -112,19 +112,22 @@ def add():
 @employee.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
+    ## UCID: mk994 Date: Dec 04
+    ## code to check for id, if no id flash a message
     id = request.args.get("id")
-    if id == "":
-        flash("")
-    print(id)
-    if True: # TODO update this for TODO edit-1
-        print("True if")
+    if id is None:
+        flash("ID is missing", "danger")
+    else: # TODO update this for TODO edit-1
         if request.method == "POST":
-            print("POST if")
             # TODO edit-1 retrieve form data for first_name, last_name, company, email
+            ##UCID: mk994 Date: Dec 04
+            ## retrieving the form data
             first_name = request.form.get("first_name")
             last_name = request.form.get("last_name")
             company_id = request.form.get("company_id")
             email = request.form.get("email")
+            ##UCID: mk994 Date: Dec 04
+            ## flash messages for required fields
             # TODO edit-2 first_name is required (flash proper error message)
             if first_name == "":
                 flash("First name is required", 'warning')
@@ -139,6 +142,8 @@ def edit():
             data.append(id)
             try:
                 # TODO edit-6 fill in proper update query
+                ##UCID: mk994 Date: Dec 04
+                ## Update query to record the edited data
                 result = DB.update("""
                 UPDATE IS601_MP2_Employees SET first_name = %s, last_name = %s, company_id = %s, email = %s WHERE id = %s 
                 """, *data)
@@ -150,8 +155,10 @@ def edit():
         try:
             print("try")
             # TODO edit-8 fetch the updated data (including company_name)
+            ##UCID: mk994 Date: Dec 04
+            ## selecting the edited data
             # company_name should be 'N/A' if the employee isn't assigned to a copany
-            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id, c.name FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON c.id = e.company_id WHERE e.id =%s", id)
+            result = DB.selectOne("SELECT e.first_name, e.last_name, e.email, e.company_id, IF(c.name is not null, c.name,'N/A') FROM IS601_MP2_Employees e LEFT JOIN IS601_MP2_Companies c ON c.id = e.company_id WHERE e.id =%s", id)
             print(result)
             if result.status:
                 row = result.row
