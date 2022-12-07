@@ -53,7 +53,7 @@ def test_add_compnay(client):
         "country": "US",
         "state":"NJ"
     }, follow_redirects=True )
-    assert True #resp.status_code == 200
+    resp.status_code == 200
     result = DB.selectOne("SELECT id from IS601_MP2_Companies where name = %s  LIMIT 1", '_test_comp')
     if result and result.row:
         id = int(result.row["id"])

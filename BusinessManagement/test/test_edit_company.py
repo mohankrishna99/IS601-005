@@ -42,7 +42,7 @@ def test_edit_company(client):
         "state": "NJ",
         "city": "Testville"
     }, follow_redirects=True )
-    assert True#resp.status_code == 200
+    resp.status_code == 200
     resp = client.get("/company/edit?id=-1", follow_redirects=True )
     # print(resp.data)
     from bs4 import BeautifulSoup
