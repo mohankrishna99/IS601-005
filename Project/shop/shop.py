@@ -16,8 +16,8 @@ def item():
     if form.validate_on_submit():
         if form.id.data: # it's an update
             try:
-                result = DB.update("UPDATE IS601_S_Items set name = %s, description = %s, stock = %s, cost = %s, image=%s WHERE id = %s",
-                form.name.data, form.description.data, form.stock.data, form.cost.data, form.image.data, form.id.data)
+                result = DB.update("UPDATE IS601_S_Products set name = %s, description = %s, category = %s, stock = %s, unit_price = %s, visibilty=%s WHERE id = %s",
+                form.name.data, form.description.data, form.category.data, form.stock.data, form.unit_price.data, 1 if form.visibility.data else 0)
                 if result.status:
                     flash(f"Updated {form.name.data}", "success")
             except Exception as e:
@@ -25,9 +25,9 @@ def item():
                 flash(f"Error updating item {form.name.data}", "danger")
         else: # it's a create
             try:
-                result = DB.update("""INSERT INTO IS601_S_Items (name, description, stock, cost, image) 
-                VALUES (%s,%s,%s,%s,%s)""",
-                form.name.data, form.description.data, form.stock.data, form.cost.data, form.image.data)
+                result = DB.update("""INSERT INTO IS601_S_Products (name, description, category, stock, unit_price, visibility) 
+                VALUES (%s,%s,%s,%s,%s, %s)""",
+                form.name.data, form.description.data, form.category.data, form.stock.data, form.unit_price.data, 1 if form.visibility.data else 0)
                 if result.status:
                     flash(f"Created {form.name.data}", "success")
                     form = ItemForm() # clear form
@@ -36,7 +36,7 @@ def item():
                 flash(f"Error creating item {form.name.data}", "danger")
     if id:
         try:
-            result = DB.selectOne("SELECT id, name, description, stock, cost, image FROM IS601_S_Items WHERE id = %s", id)
+            result = DB.selectOne("SELECT id, name, description, category, stock, unit_price, visibility FROM IS601_S_Products WHERE id = %s", id)
             if result.status and result.row:
                     form.process(MultiDict(result.row))
         except Exception as e:
