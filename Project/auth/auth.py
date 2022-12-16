@@ -65,6 +65,7 @@ def login():
                             print("role rows", result.rows)
                             user.roles = [Role(**r) for r in result.rows]
                         print(f"Roles: {user.roles}")
+
                         success = login_user(user) # login the user via flask_login
                         
                         if success:
