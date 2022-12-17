@@ -8,7 +8,7 @@
     <form class="row row-cols-lg-auto g-3 align-items-center" style="margin-bottom:5px">
         <div class="col-12">
             <label class="form-label" for="name">Name</label>
-            <input class="form-control" type="text" id="name" name="name" placeholder="Name">
+            <input class="form-control" type="text" id="name" name="name" placeholder="Name" value="{{request.args.get('name') or ''}}">
         </div>
         <div class="col-12">
             {% set options = ["Clothing", "Food", "Home", "Electronics"] %}
@@ -17,7 +17,7 @@
                 <option value="">Choose...</option>
                 {% for op in options %}
                 {# using an inline if to output the selected attribute if it matches the op #}
-                <option value="{{op}}">{{op|capitalize}}</option>
+                <option {{'selected' if request.args.get('category')==op }} value="{{op}}">{{op|capitalize}}</option>
                 {% endfor %}
             </select>
         </div>
