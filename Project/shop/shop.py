@@ -72,11 +72,24 @@ def items():
     return render_template("items.html", rows=rows)
 
 @shop.route("/shop", methods=["GET","POST"])
-@login_required
 def shop_list():
     rows = []
+    args = []
+    name = request.args.get("name")
+    category = request.args.get("category")
+    price = request.args.get("price")
+    query = "SELECT id, name, description, stock, unit_price FROM IS601_S_Products WHERE stock > 0 AND visibility = 1"
+    if name:
+        query += " AND name LIKE %s"
+        args.append(f"%{name}%")
+    if category:
+        query += f" AND category = '{category}'"
+    if price:
+        query += f" ORDER BY unit_price {price}"
+    query += " LIMIT 10"
+
     try:
-        result = DB.selectAll("SELECT id, name, description, stock, cost, image FROM IS601_S_Items WHERE stock > 0 LIMIT 25",)
+        result = DB.selectAll(query, *args)
         if result.status and result.rows:
             rows = result.rows
     except Exception as e:
