@@ -98,8 +98,10 @@ def shop_list():
     return render_template("shop.html", rows=rows)
 
 @shop.route("/cart", methods=["GET","POST"])
-@login_required
 def cart():
+    if not current_user.is_authenticated:
+        flash("Please login to add the cart", "warning")
+        return redirect(url_for('shop.shop_list'))
     item_id = request.form.get("item_id")
     id = request.form.get("id", item_id)
     print("id", id)
@@ -108,17 +110,17 @@ def cart():
     if id and user_id:
         if quantity > 0:
             try:
-                result = DB.selectOne("SELECT cost,name from IS601_S_Items WHERE id = %s", id)
+                result = DB.selectOne("SELECT unit_price,name from IS601_S_Products WHERE id = %s", id)
                 print("result", result)
                 if result.status and result.row:
-                    cost = result.row["cost"]
+                    cost = result.row["unit_price"]
                     name = result.row["name"]
                     if item_id: # update from cart
                         result = DB.insertOne("""
                         UPDATE IS601_S_Cart SET
-                        quantity = %(quantity)s,
-                        cost = %(cost)s
-                        WHERE item_id = %(id)s and user_id = %(user_id)s
+                        desired_quantity = %(quantity)s,
+                        unit_price = %(cost)s
+                        WHERE product_id = %(id)s and user_id = %(user_id)s
                         """,{
                             "id":id,
                             "quantity": quantity,
@@ -129,11 +131,11 @@ def cart():
                             flash(f"Updated quantity for {name} to {quantity}", "success")
                     else: #add from shop
                         result = DB.insertOne("""
-                        INSERT INTO IS601_S_Cart (item_id, quantity, cost, user_id)
+                        INSERT INTO IS601_S_Cart (product_id, desired_quantity, unit_price, user_id)
                         VALUES(%(id)s, %(quantity)s, %(cost)s, %(user_id)s)
                         ON DUPLICATE KEY UPDATE
-                        quantity = quantity + %(quantity)s,
-                        cost = %(cost)s
+                        desired_quantity = desired_quantity + %(quantity)s,
+                        unit_price = %(cost)s
                         """,{
                             "id":id,
                             "quantity": quantity,
@@ -156,8 +158,8 @@ def cart():
                 flash("Error deleting item from cart", "danger")
     rows = []
     try:
-        result = DB.selectAll("""SELECT c.id, item_id, name, c.quantity, (c.quantity * c.cost) as subtotal 
-        FROM IS601_S_Cart c JOIN IS601_S_Items i on c.item_id = i.id
+        result = DB.selectAll("""SELECT c.id, c.product_id, name, c.desired_quantity, (c.desired_quantity * c.unit_price) as subtotal 
+        FROM IS601_S_Cart c JOIN IS601_S_Products i on c.product_id = i.id
         WHERE c.user_id = %s
         """, current_user.get_id())
         if result and result.rows:
