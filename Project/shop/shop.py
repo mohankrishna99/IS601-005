@@ -63,7 +63,7 @@ def delete():
 def items():
     rows = []
     try:
-        result = DB.selectAll("SELECT id, name, description, stock, cost, image FROM IS601_S_Items LIMIT 25",)
+        result = DB.selectAll("SELECT id, name, description, stock, unit_price, visibility FROM IS601_S_Products LIMIT 25",)
         if result.status and result.rows:
             rows = result.rows
     except Exception as e:
@@ -75,6 +75,7 @@ def items():
 def shop_list():
     rows = []
     args = []
+    ##UCID: mk994 Date Dec 17th
     name = request.args.get("name")
     category = request.args.get("category")
     price = request.args.get("price")
@@ -87,7 +88,6 @@ def shop_list():
     if price:
         query += f" ORDER BY unit_price {price}"
     query += " LIMIT 10"
-
     try:
         result = DB.selectAll(query, *args)
         if result.status and result.rows:
