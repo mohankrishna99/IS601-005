@@ -29,9 +29,9 @@
                 <td style="width:10em">
                     <form method="POST">
                         <div class="row">
-                            <input type="hidden" name="item_id" value="{{row['item_id']}}" />
+                            <input type="hidden" name="item_id" value="{{row['product_id']}}" />
                             <div class="col">
-                                <input type="number" class="form-control" name="quantity"
+                                <input type="number" class="form-control" name="quantity" min="0"
                                     value="{{row['desired_quantity']}}" />
                             </div>
                             <div class="col d-grid">

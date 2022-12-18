@@ -150,7 +150,7 @@ def cart():
         else:
             # assuming delete
             try:
-                result = DB.delete("DELETE FROM IS601_S_Cart where item_id = %s and user_id = %s", id, user_id)
+                result = DB.delete("DELETE FROM IS601_S_Cart where product_id = %s and user_id = %s", id, user_id)
                 if result.status:
                     flash("Deleted item from cart", "success")
             except Exception as e:
