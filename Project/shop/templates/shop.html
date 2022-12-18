@@ -39,7 +39,7 @@
     </form>
     <div class="row">
         {% for row in rows %}
-        <div class="col">
+        <div class="col" style="margin: 5px;">
             <div class="card text-dark bg-light border" style="width: 20em">
                 <div class="card-header">
                     Stock: {{row["stock"]}}
@@ -56,6 +56,9 @@
                     <div class="card-text lead">
                         Cost: {{row["unit_price"]}}
                     </div>
+                    <div class="d-grid mt-1">
+                        <a href="{{url_for('shop.itemdetails', id=row['id'])}}" class="btn btn-secondary">View</a>
+                    </div>
                     <form action="{{url_for('shop.cart')}}" method="POST">
                         <input type="hidden" name="id" value="{{row['id']}}" />
                         <input type="number" class="form-control" name="q" value="1" />
@@ -63,7 +66,13 @@
                             <input type="submit" value="Add" class="btn btn-primary" />
                         </div>
                     </form>
-
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.has_role("Admin") %}
+                    <div class="d-grid mt-1">
+                    <a href="{{url_for('shop.item', id=row['id'])}}" class="btn btn-secondary">Edit</a>
+                    </div>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>

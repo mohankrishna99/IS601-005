@@ -16,8 +16,8 @@ def item():
     if form.validate_on_submit():
         if form.id.data: # it's an update
             try:
-                result = DB.update("UPDATE IS601_S_Products set name = %s, description = %s, category = %s, stock = %s, unit_price = %s, visibilty=%s WHERE id = %s",
-                form.name.data, form.description.data, form.category.data, form.stock.data, form.unit_price.data, 1 if form.visibility.data else 0)
+                result = DB.update("UPDATE IS601_S_Products set name = %s, description = %s, category = %s, stock = %s, unit_price = %s, visibility=%s WHERE id = %s",
+                form.name.data, form.description.data, form.category.data, form.stock.data, form.unit_price.data, 1 if form.visibility.data else 0, form .id.data)
                 if result.status:
                     flash(f"Updated {form.name.data}", "success")
             except Exception as e:
@@ -314,3 +314,18 @@ def order():
         print("Error getting order", e)
         flash("Error fetching order", "danger")
     return render_template("order.html", rows=rows, total=total)
+
+@shop.route("/itemdetails", methods=["GET","POST"])
+@login_required
+def itemdetails():
+    form = ItemForm()
+    id = request.args.get("id", form.id.data or None)
+    if id:
+        try:
+            result = DB.selectOne("SELECT id, name, description, category, stock, unit_price, visibility FROM IS601_S_Products WHERE id = %s", id)
+            if result.status and result.row:
+                    row = result.row
+        except Exception as e:
+            print("Error fetching item", e)
+            flash("Item not found", "danger")
+    return render_template("item_details.html", row = row)

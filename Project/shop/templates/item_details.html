@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Item{% endblock %}
+<!-- content -->
+{% block content %}
+<div class="container-fluid">
+    <div class="h4">Shop</div>
+    <div class="row">
+        <div class="col" style="margin: 5px;">
+            <div class="card text-dark bg-light border" style="width: 20em">
+                <div class="card-header">
+                    Stock: {{row["stock"]}}
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        {{row["name"]}}
+                    </div>
+                    <div class="card-text lead">
+                        {{row["description"]}}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="card-text lead">
+                        Cost: {{row["unit_price"]}}
+                    </div>
+                    <form action="{{url_for('shop.cart')}}" method="POST">
+                        <input type="hidden" name="id" value="{{row['id']}}" />
+                        <input type="number" class="form-control" name="q" value="1" />
+                        <div class="d-grid mt-1">
+                            <input type="submit" value="Add" class="btn btn-primary" />
+                        </div>
+                    </form>
+                    {% if current_user.has_role("Admin") %}
+                    <div class="d-grid mt-1">
+                        <a href="{{url_for('shop.item', id=row['id'])}}" class="btn btn-secondary">Edit</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
