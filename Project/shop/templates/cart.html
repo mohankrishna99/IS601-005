@@ -5,7 +5,8 @@
 {% block content %}
 <div class="container-fluid">
     <div class="h4">Cart</div>
-    <table class="table text-light bg-dark">
+    <p>Click on the product name for more details</p>
+    <table class="table text-dark bg-light">
         <thread>
             <tr>
                 <th>Item</th>
@@ -18,7 +19,13 @@
             {% set ns = namespace(total=0) %}
             {% for row in rows %}
             <tr>
-                <td>{{row["name"]}}</td>
+                <td>
+                    <b>
+                        <a href="{{url_for('shop.itemdetails', id=row['id'])}}" style="text-decoration: none; color:cornflowerblue">
+                            {{row["name"]}}
+                        </a>
+                    </b>
+                </td>
                 <td style="width:10em">
                     <form method="POST">
                         <div class="row">
