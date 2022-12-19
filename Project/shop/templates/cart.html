@@ -45,7 +45,7 @@
                 <td>
                     <!-- lazy delete using quantity < 0 logic -->
                     <form method="POST">
-                        <input type="hidden" name="item_id" value="{{row['item_id']}}" />
+                        <input type="hidden" name="item_id" value="{{row['product_id']}}" />
                         <input type="hidden" name="quantity" value="-1" />
                         <input type="submit" value="x" class="btn btn-danger btn-sm" />
                     </form>
@@ -60,6 +60,9 @@
                 </td>
             </tr>
             <tr>
+                <td class="text-start">
+                    <a href="{{url_for('shop.cart', delete_all=1)}}" class="btn btn-danger">Clear Cart</a>
+                </td>
                 <td class="text-end" colspan="100%">
                     {# Note: Shop people need an order form page prior to doing the checkout process,
                     my example skips that since I don't record address/payment details #}
