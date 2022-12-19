@@ -102,6 +102,7 @@ def cart():
     if not current_user.is_authenticated:
         flash("Please login to add the cart", "warning")
         return redirect(url_for('shop.shop_list'))
+    delete_all =  request.args.get('delete_all')
     item_id = request.form.get("item_id")
     id = request.form.get("id", item_id)
     print("id", id)
@@ -156,6 +157,10 @@ def cart():
             except Exception as e:
                 print("Error deleting item", e)
                 flash("Error deleting item from cart", "danger")
+    if delete_all:
+        result = DB.delete("DELETE FROM IS601_S_Cart WHERE user_id = %s", user_id)
+        if result.status:
+            flash("Cleared cart", "success")
     rows = []
     try:
         result = DB.selectAll("""SELECT c.id, c.product_id, name, c.desired_quantity, (c.desired_quantity * c.unit_price) as subtotal 
