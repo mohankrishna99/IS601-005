@@ -25,7 +25,7 @@
                     </div>
                     <form action="{{url_for('shop.cart')}}" method="POST">
                         <input type="hidden" name="id" value="{{row['id']}}" />
-                        <input type="number" class="form-control" name="q" value="1"  style="margin: 5px; width:10em"/>
+                        <input type="number" class="form-control" name="quantity" value="1"  style="margin: 5px; width:10em"/>
                         <div class="d-grid mt-1" style="margin: 5px; width:10em">
                             <input type="submit" value="Add" class="btn btn-primary" />
                         </div>
