@@ -229,8 +229,12 @@ def purchase():
             else:
                 order_id = int(DB.db.fetch_eof_status()["insert_id"])
                 order["order_id"] = order_id
+                order["payment_method"] = payment_method
                 order["total"] = total
                 order["quantity"] = quantity
+                order["fname"] = fname
+                order["lname"] = lname
+                order["address"] = address
         # record order history
         if order_id > -1 and not has_error:
             # Note: Not really an insert 1, it'll copy data from Table B into Table A
