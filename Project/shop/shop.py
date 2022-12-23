@@ -283,7 +283,7 @@ def orders():
     rows = []
     try:
         result = DB.selectAll("""
-        SELECT id, total_spent, number_of_items, created FROM IS601_S_Orders WHERE user_id = %s
+        SELECT id, total_price, created FROM IS601_S_Orders WHERE user_id = %s
         """, current_user.get_id())
         if result.status and result.rows:
             rows = result.rows
@@ -304,11 +304,13 @@ def order():
     try:
         # locking query to order_id and user_id so the user can see only their orders
         result = DB.selectAll("""
-        SELECT name, oi.cost, oi.quantity, (oi.cost*oi.quantity) as subtotal FROM IS601_S_OrderItems oi JOIN IS601_S_Items i on oi.item_id = i.id WHERE order_id = %s ANd user_id = %s
+        SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s ANd o.user_id = %s
         """, id, current_user.get_id())
         if result.status and result.rows:
             rows = result.rows
+            print(rows)
             total = sum(int(row["subtotal"]) for row in rows)
+            print(total)
     except Exception as e:
         print("Error getting order", e)
         flash("Error fetching order", "danger")
