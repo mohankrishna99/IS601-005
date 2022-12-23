@@ -5,22 +5,24 @@
 {% block content %}
 <div class="container-fluid">
     <div class="h4">Order Confirmation</div>
-    <div class="h5">Thank you for your investment, may it help you survive the night</div>
-    <table class="table text-light bg-dark">
+    <div class="h5">Thank you for your order & helping the oasis grow</div>
+    <table class="table text-dark bg-light">
         <thead>
             <th>Order ID</th>
+            <th>Payment Method</th>
             <th>Total Spent</th>
             <th>Total Items</th>
         </thead>
         <tbody>
             <tr>
                 <td>{{order.order_id}}</td>
+                <td>{{order.payment_method}}</td>
                 <td>{{order.total}}</td>
                 <td>{{order.quantity}}</td>
             </tr>
         </tbody>
     </table>
-    <table class="table text-light bg-dark">
+    <table class="table text-dark bg-light">
         <thread>
             <tr>
                 <th>Item</th>
@@ -34,7 +36,7 @@
             <tr>
                 <td>{{row["name"]}}</td>
                 <td style="width:10em">
-                    {{row["quantity"]}}
+                    {{row["desired_quantity"]}}
                 </td>
                 <td>{{row['subtotal']}}</td>
                 {# https://stackoverflow.com/a/51880609 #}
@@ -48,5 +50,8 @@
             </tr>
         </tbody>
     </table>
+    <h3>Shipping Information</h3>
+    <p>{{order.fname}} {{order.lname}}</p><br>
+    <p>{{order.address}}</p>
 </div>
 {% endblock %}
