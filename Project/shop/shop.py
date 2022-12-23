@@ -1,7 +1,7 @@
 import traceback
 from flask import Blueprint, request, flash, render_template, redirect, url_for
 from werkzeug.datastructures import MultiDict
-from shop.forms import ItemForm
+from shop.forms import ItemForm, CheckoutForm
 from sql.db import DB
 from roles.permissions import admin_permission
 from flask_login import login_required, current_user
@@ -185,9 +185,9 @@ def purchase():
         DB.getDB().autocommit = False # make a transaction
 
         # get cart to verify
-        
-        result = DB.selectAll("""SELECT c.id, item_id, name, c.quantity, i.stock, c.cost as cart_cost, i.cost as item_cost, (c.quantity * c.cost) as subtotal 
-        FROM IS601_S_Cart c JOIN IS601_S_Items i on c.item_id = i.id
+        ## UCID: mk994, Date: Dec 21
+        result = DB.selectAll("""SELECT c.id, product_id, name, c.desired_quantity, i.stock, c.unit_price as cart_cost, i.unit_price as item_cost, (c.desired_quantity * c.unit_price) as subtotal 
+        FROM IS601_S_Cart c JOIN IS601_S_Products i on c.product_id = i.id
         WHERE c.user_id = %s
         """, current_user.get_id())
         if result.status and result.rows:
@@ -195,25 +195,33 @@ def purchase():
         # verify cart
         has_error = False
         for item in cart:
-            if item["quantity"] > item["stock"]:
+            if item["desired_quantity"] > item["stock"]:
                 flash(f"Item {item['name']} doesn't have enough stock left", "warning")
                 has_error = True
+            print(item['cart_cost'], item["item_cost"])
             if item["cart_cost"] != item["item_cost"]:
                 flash(f"Item {item['name']}'s price has changed, please refresh cart", "warning")
                 has_error = True
             total += int(item["subtotal"] or 0)
-            quantity += int(item["quantity"])
+            quantity += int(item["desired_quantity"])
         # check can afford
         if not has_error:
-            balance = int(current_user.get_balance())
+            balance = float(request.form.get('amount'))
             if total > balance:
                 flash("You can't afford to make this purchase", "danger")
                 has_error = True
         # create order data
         order_id = -1
         if not has_error:
-            result = DB.insertOne("""INSERT INTO IS601_S_Orders (total_spent, number_of_items, user_id)
-            VALUES (%s, %s, %s)""", total, quantity, current_user.get_id())
+            ##UCID: mk994, Date: Dec21
+            address = request.form.get('apt') + "," + request.form.get('city') + "," + request.form.get('state') + "," + request.form.get('country') + "," + request.form.get('zpcode')
+            payment_method = request.form.get('paymentmethod')
+            money_received = request.form.get('amount')
+            fname = request.form.get('fname')
+            lname = request.form.get('lname')
+            print(total, quantity, current_user.get_id(), address, payment_method, money_received, fname, lname)
+            result = DB.insertOne("""INSERT INTO IS601_S_Orders (total_price, user_id, address, payment_method, money_received, first_name, last_name)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)""", total, current_user.get_id(), address, payment_method, money_received, fname, lname)
             if not result.status:
                 flash("Error generating order", "danger")
                 DB.getDB().rollback()
@@ -221,13 +229,17 @@ def purchase():
             else:
                 order_id = int(DB.db.fetch_eof_status()["insert_id"])
                 order["order_id"] = order_id
+                order["payment_method"] = payment_method
                 order["total"] = total
                 order["quantity"] = quantity
+                order["fname"] = fname
+                order["lname"] = lname
+                order["address"] = address
         # record order history
         if order_id > -1 and not has_error:
             # Note: Not really an insert 1, it'll copy data from Table B into Table A
-            result = DB.insertOne("""INSERT INTO IS601_S_OrderItems (quantity, cost, order_id, item_id, user_id)
-            SELECT quantity, cost, %s, item_id, user_id FROM IS601_S_Cart c WHERE c.user_id = %s""",
+            result = DB.insertOne("""INSERT INTO IS601_S_OrderItems (quantity, unit_price, order_id, product_id)
+            SELECT desired_quantity, unit_price, %s, product_id FROM IS601_S_Cart c WHERE c.user_id = %s""",
             order_id, current_user.get_id())
             if not result.status:
                 flash("Error recording order history", "danger")
@@ -235,44 +247,24 @@ def purchase():
                 DB.getDB().rollback()
         # update stock based on cart data
         if not has_error:
+            ##UCID: mk994, Date: Dec 21
             result = DB.update("""
-            UPDATE IS601_S_Items 
-                set stock = stock - (select IFNULL(quantity, 0) FROM IS601_S_Cart WHERE item_id = IS601_S_Items.id and user_id = %(uid)s) 
-                WHERE id in (SELECT item_id from IS601_S_Cart where user_id = %(uid)s)
+            UPDATE IS601_S_Products 
+                set stock = stock - (select IFNULL(desired_quantity, 0) FROM IS601_S_Cart WHERE product_id = IS601_S_Products.id and user_id = %(uid)s) 
+                WHERE id in (SELECT product_id from IS601_S_Cart where user_id = %(uid)s)
             """, {"uid":current_user.get_id()} )
             if not result.status:
                 flash("Error updating stock", "danger")
                 has_error = True
                 DB.getDB().rollback()
 
-        # apply purchase (specific to my project)
-        if not has_error:
-            # here I'm using a known item_id to update my player's stats
-            attrs = [("life", -1), ("speed", -2), ("fire_rate", -3), ("damage", -4), ("radius", -5)]
-            for attr, target_id in attrs:
-                try:
-                    query = f"""
-                    INSERT INTO IS601_S_Attributes (name, value, user_id)
-                    VALUES (%(attr)s,
-                    (SELECT IFNULL(SUM(quantity), 0) FROM IS601_S_OrderItems WHERE item_id = %(target_id)s and user_id = %(uid)s)
-                     , %(uid)s)
-                    ON DUPLICATE KEY UPDATE 
-                    value = (SELECT IFNULL(SUM(quantity), 0) FROM IS601_S_OrderItems WHERE item_id = %(target_id)s and user_id = %(uid)s)
-                    """
-                    print(f"{attr} query", query)
-                    result = DB.insertOne(query,
-                    {"uid": current_user.get_id(),
-                    "attr": attr,
-                    "target_id": int(target_id)})
-                except Exception as e:
-                    print(f"Error updating attribute {attr}", e)
         # empty the cart
         if not has_error:
             result = DB.delete("DELETE FROM IS601_S_Cart WHERE user_id = %s", current_user.get_id())
     
         if not has_error:
-            details = f"Spent {total} on {quantity} upgrades" # TBD
-            current_user.account.remove_points(-total, reason="purchase", details=details)
+            #details = f"Spent {total} on {quantity} upgrades" # TBD
+            #current_user.account.remove_points(-total, reason="purchase", details=details)
             DB.getDB().commit()
             flash("Purchase successful!", "success")
         else:
@@ -289,38 +281,70 @@ def purchase():
 @login_required
 def orders():
     rows = []
-    try:
-        result = DB.selectAll("""
-        SELECT id, total_spent, number_of_items, created FROM IS601_S_Orders WHERE user_id = %s
-        """, current_user.get_id())
-        if result.status and result.rows:
-            rows = result.rows
-    except Exception as e:
-        print("Error getting orders", e)
-        flash("Error fetching orders", "danger")
-    return render_template("orders.html", rows=rows)
+    if current_user.has_role("Admin"):
+        print("admin")
+        try:
+            result = DB.selectAll("""
+            SELECT o.id, o.user_id, u.username, o.total_price, o.created FROM IS601_S_Orders o, IS601_Users u WHERE o.user_id = u.id
+            """)
+            if result.status and result.rows:
+                rows = result.rows
+        except Exception as e:
+            print("Error getting orders", e)
+            flash("Error fetching orders", "danger")
+        return render_template("orders.html", rows=rows)
+    else:
+        try:
+            result = DB.selectAll("""
+            SELECT id, total_price, created FROM IS601_S_Orders WHERE user_id = %s
+            """, current_user.get_id())
+            if result.status and result.rows:
+                rows = result.rows
+        except Exception as e:
+            print("Error getting orders", e)
+            flash("Error fetching orders", "danger")
+        return render_template("orders.html", rows=rows)
 
 @shop.route("/order", methods=["GET"])
 @login_required
 def order():
     rows = []
-    total = 0
-    id = request.args.get("id")
-    if not id:
-        flash("Invalid order", "danger")
-        return redirect(url_for("shop.orders"))
-    try:
-        # locking query to order_id and user_id so the user can see only their orders
-        result = DB.selectAll("""
-        SELECT name, oi.cost, oi.quantity, (oi.cost*oi.quantity) as subtotal FROM IS601_S_OrderItems oi JOIN IS601_S_Items i on oi.item_id = i.id WHERE order_id = %s ANd user_id = %s
-        """, id, current_user.get_id())
-        if result.status and result.rows:
-            rows = result.rows
-            total = sum(int(row["subtotal"]) for row in rows)
-    except Exception as e:
-        print("Error getting order", e)
-        flash("Error fetching order", "danger")
-    return render_template("order.html", rows=rows, total=total)
+    if current_user.has_role("Admin"):
+        total = 0
+        id = request.args.get("id")
+        if not id:
+            flash("Invalid order", "danger")
+            return redirect(url_for("shop.orders"))
+        try:
+            # locking query to order_id and user_id so the user can see only their orders
+            result = DB.selectAll("""
+            SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s
+            """, id)
+            if result.status and result.rows:
+                rows = result.rows
+                total = sum(int(row["subtotal"]) for row in rows)
+        except Exception as e:
+            print("Error getting order", e)
+            flash("Error fetching order", "danger")
+        return render_template("order.html", rows=rows, total=total)
+    else:
+        total = 0
+        id = request.args.get("id")
+        if not id:
+            flash("Invalid order", "danger")
+            return redirect(url_for("shop.orders"))
+        try:
+            # locking query to order_id and user_id so the user can see only their orders
+            result = DB.selectAll("""
+            SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s ANd o.user_id = %s
+            """, id, current_user.get_id())
+            if result.status and result.rows:
+                rows = result.rows
+                total = sum(int(row["subtotal"]) for row in rows)
+        except Exception as e:
+            print("Error getting order", e)
+            flash("Error fetching order", "danger")
+        return render_template("order.html", rows=rows, total=total)
 
 @shop.route("/itemdetails", methods=["GET","POST"])
 @login_required
@@ -336,3 +360,20 @@ def itemdetails():
             print("Error fetching item", e)
             flash("Item not found", "danger")
     return render_template("item_details.html", row = row)
+
+@shop.route("/checkout", methods=["GET","POST"])
+@login_required
+def checkout():
+    form = CheckoutForm()
+    res = DB.selectOne("SELECT username FROM IS601_Users WHERE id = %s", current_user.get_id())
+    if res.status:
+        form.fname.data = res.row["username"]
+    print(form.fname.data)
+    result = DB.selectAll("""SELECT c.id, c.product_id, name, c.desired_quantity, c.unit_price, (c.desired_quantity * c.unit_price) as subtotal, i.unit_price as item_cost 
+        FROM IS601_S_Cart c JOIN IS601_S_Products i on c.product_id = i.id
+        WHERE c.user_id = %s
+        """, current_user.get_id())
+    if result and result.rows:
+        rows = result.rows
+    print(rows)
+    return render_template("checkout.html", form=form, rows = rows)

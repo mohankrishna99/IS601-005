@@ -10,6 +10,7 @@ on:
       - DeploymentSetup
       - Flask-Sample-PyTest
       - Milestone2
+      - Milestone3
 
 # Your workflows jobs.
 jobs:
