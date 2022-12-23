@@ -281,40 +281,70 @@ def purchase():
 @login_required
 def orders():
     rows = []
-    try:
-        result = DB.selectAll("""
-        SELECT id, total_price, created FROM IS601_S_Orders WHERE user_id = %s
-        """, current_user.get_id())
-        if result.status and result.rows:
-            rows = result.rows
-    except Exception as e:
-        print("Error getting orders", e)
-        flash("Error fetching orders", "danger")
-    return render_template("orders.html", rows=rows)
+    if current_user.has_role("Admin"):
+        print("admin")
+        try:
+            result = DB.selectAll("""
+            SELECT o.id, o.user_id, u.username, o.total_price, o.created FROM IS601_S_Orders o, IS601_Users u WHERE o.user_id = u.id
+            """)
+            if result.status and result.rows:
+                rows = result.rows
+        except Exception as e:
+            print("Error getting orders", e)
+            flash("Error fetching orders", "danger")
+        return render_template("orders.html", rows=rows)
+    else:
+        try:
+            result = DB.selectAll("""
+            SELECT id, total_price, created FROM IS601_S_Orders WHERE user_id = %s
+            """, current_user.get_id())
+            if result.status and result.rows:
+                rows = result.rows
+        except Exception as e:
+            print("Error getting orders", e)
+            flash("Error fetching orders", "danger")
+        return render_template("orders.html", rows=rows)
 
 @shop.route("/order", methods=["GET"])
 @login_required
 def order():
     rows = []
-    total = 0
-    id = request.args.get("id")
-    if not id:
-        flash("Invalid order", "danger")
-        return redirect(url_for("shop.orders"))
-    try:
-        # locking query to order_id and user_id so the user can see only their orders
-        result = DB.selectAll("""
-        SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s ANd o.user_id = %s
-        """, id, current_user.get_id())
-        if result.status and result.rows:
-            rows = result.rows
-            print(rows)
-            total = sum(int(row["subtotal"]) for row in rows)
-            print(total)
-    except Exception as e:
-        print("Error getting order", e)
-        flash("Error fetching order", "danger")
-    return render_template("order.html", rows=rows, total=total)
+    if current_user.has_role("Admin"):
+        total = 0
+        id = request.args.get("id")
+        if not id:
+            flash("Invalid order", "danger")
+            return redirect(url_for("shop.orders"))
+        try:
+            # locking query to order_id and user_id so the user can see only their orders
+            result = DB.selectAll("""
+            SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s
+            """, id)
+            if result.status and result.rows:
+                rows = result.rows
+                total = sum(int(row["subtotal"]) for row in rows)
+        except Exception as e:
+            print("Error getting order", e)
+            flash("Error fetching order", "danger")
+        return render_template("order.html", rows=rows, total=total)
+    else:
+        total = 0
+        id = request.args.get("id")
+        if not id:
+            flash("Invalid order", "danger")
+            return redirect(url_for("shop.orders"))
+        try:
+            # locking query to order_id and user_id so the user can see only their orders
+            result = DB.selectAll("""
+            SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal FROM IS601_S_OrderItems oi, IS601_S_Products i, IS601_S_Orders o WHERE oi.product_id = i.id AND oi.order_id = o.id AND order_id = %s ANd o.user_id = %s
+            """, id, current_user.get_id())
+            if result.status and result.rows:
+                rows = result.rows
+                total = sum(int(row["subtotal"]) for row in rows)
+        except Exception as e:
+            print("Error getting order", e)
+            flash("Error fetching order", "danger")
+        return render_template("order.html", rows=rows, total=total)
 
 @shop.route("/itemdetails", methods=["GET","POST"])
 @login_required
